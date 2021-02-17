@@ -79,12 +79,29 @@
 
     <!-- Main Script -->
     <script type="module">
+
+      const url = document.getElementById("endpoint");
+      const output = document.getElementById("output");
+      const createForm = document.getElementById("recordForm");
+      const createFormID = document.getElementById("recordIDcontainer");
+      const author = document.getElementById("author");
+      const title = document.getElementById("title");
+      const recordID = document.getElementById("recordID");
+
       // This function should fetch all of the data from the given endpoint.
       // From the 4 CRUD actions, this is the READ action, and uses the GET http method.
       // The main difference from fetchOne() will be the URL you request from; check
       // the writeup to view the URL pattern for fetch one and fetch all
       function fetchAll() {
-        // TODO
+        createForm.style.display = "none";
+        createFormID.style.display = "none";
+        fetch(url.value)
+          .then(response => {
+            if (response.ok)
+              response.json().then(data => output.value = JSON.stringify(data));
+            else
+              output.value = "Network Error: " + response.status;
+          });
       }
 
       // This function should fetch one entry from the given endpoint.
@@ -92,23 +109,76 @@
       // The main difference from fetchAll() will be the URL you request from; check
       // the writeup to view the URL pattern for fetch one and fetch all
       function fetchOne() {
-        // TODO
+        createForm.style.display = "none";
+        createFormID.style.display = "none";
+        let id = prompt("Enter record id");
+        fetch(url.value + "/" + String(id))
+          .then(response => {
+            if (response.ok)
+              response.json().then(data => output.value = JSON.stringify(data));
+            else
+              output.value = "Network Error: " + response.status;
+          });
       }
 
       // This function should use fetch to create one entry in the given endpoint.
       // From the 4 CRUD actions, this is the CREATE action, and uses the POST http method.
       // The main difference from updateRecord() will be the URL you send data to; check
       // the writeup to view the URL pattern for create and update
-      function createRecord() {
-        // TODO
+      function createRecord(action) {
+        if (action === "show") {
+          createForm.style.display = "block";
+          createFormID.style.display = "none";
+        }
+        else {
+            const data = {
+              author: author.value,
+              title: title.value
+            }
+            fetch(url.value, {
+              method: "post",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            })
+              .then(response => {
+              if (response.ok)
+                response.json().then(data => output.value = JSON.stringify(data));
+              else
+                output.value = "Network Error: " + response.status;
+              });
+        }
       }
 
       // This function should use fetch to update one existing entry in the given endpoint.
       // From the 4 CRUD actions, this is the UPDATE action, and uses the PUT http method.
       // The main difference from createRecord() will be the URL you send data to; check
       // the writeup to view the URL pattern for create and update
-      function updateRecord() {
-        // TODO
+      function updateRecord(action) {
+        if (action === "show") {
+          createForm.style.display = "block";
+          createFormID.style.display = "block";
+        }
+        else {
+            const data = {
+              author: author.value,
+              title: title.value
+            }
+            fetch(url.value + "/" + String(recordID.value), {
+              method: "put",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            })
+              .then(response => {
+              if (response.ok)
+                response.json().then(data => output.value = JSON.stringify(data));
+              else
+                output.value = "Network Error: " + response.status;
+              });
+        }
       }
 
       // This function should use fetch to delete one existing entry in the given endpoint.
@@ -117,7 +187,18 @@
       // request; check the writeup to view the URL pattern for get one and delete. THERE IS NO 
       // delete all, only delete one.
       function deleteRecord() {
-        // TODO
+        createForm.style.display = "none";
+        createFormID.style.display = "none";
+        let id = prompt("Enter record id");
+        fetch(url.value + "/" + String(id), {
+          method: "delete"
+        })
+          .then(response => {
+            if (response.ok)
+              response.json().then(data => output.value = JSON.stringify(data));
+            else
+              output.value = "Network Error: " + response.status;
+          });
       }
 
       window.addEventListener('DOMContentLoaded', () => {
@@ -127,7 +208,8 @@
           .addEventListener("submit", event => {
             event.preventDefault();
             let command = document.getElementById('action').value;
-
+            output.value = "";
+            createForm.reset();
             switch (command) {
               case "List All":
                 fetchAll();
